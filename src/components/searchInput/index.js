@@ -12,8 +12,6 @@ import {
   Keyboard,
 } from 'react-native';
 
-import debounce from 'lodash.debounce';
-
 import {DeviceHeight, DeviceWidth} from '../../utils';
 import {Colors} from '../../theme/color';
 import {icons} from '../../images/index';
@@ -80,7 +78,7 @@ const SearchInput = ({inputStyle, placeholder, onUserList}) => {
     }
   };
 
-  const debounceData = useMemo(() => debounce(_request, 0));
+  const debounceData = useMemo(() => _request);
 
   const _onChangeText = text => {
     setIsLoading(true);
