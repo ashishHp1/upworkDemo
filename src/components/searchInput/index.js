@@ -9,6 +9,7 @@ import {
   TouchableHighlight,
   ActivityIndicator,
   Image,
+  Keyboard,
 } from 'react-native';
 
 import debounce from 'lodash.debounce';
@@ -18,7 +19,7 @@ import {Colors} from '../../theme/color';
 import {icons} from '../../images/index';
 import {CONFIG} from '../../../config';
 
-const SearchInput = ({inputStyle, placeholder}) => {
+const SearchInput = ({inputStyle, placeholder, onUserList}) => {
   let _requests = [];
   let _results = [];
 
@@ -101,7 +102,13 @@ const SearchInput = ({inputStyle, placeholder}) => {
     setShowList(false);
   };
 
-  const _onPress = () => {};
+  const _onPress = rowData => {
+    Keyboard.dismiss();
+    setIsLoading(false);
+    setStateText('');
+    setUserData([]);
+    onUserList(rowData);
+  };
 
   const _getRowLoader = () => {
     return <ActivityIndicator animating={true} size="small" />;
