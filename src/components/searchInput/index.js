@@ -8,16 +8,19 @@ import {
   ScrollView,
   TouchableHighlight,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 
 import debounce from 'lodash.debounce';
 
-import {DeviceHeight} from '../../utils';
+import {DeviceHeight, DeviceWidth} from '../../utils';
 import {Colors} from '../../theme/color';
+import {icons} from '../../images/index';
 import {CONFIG} from '../../../config';
 
 const SearchInput = ({inputStyle, placeholder}) => {
   let _requests = [];
+  let _results = [];
 
   const [showList, setShowList] = useState(false);
   const [userData, setUserData] = useState([]);
@@ -68,7 +71,7 @@ const SearchInput = ({inputStyle, placeholder}) => {
       };
       request.open(
         'GET',
-        `${CONFIG.API_URL}${text}&access_token=${CONFIG.Github_token}`,
+        `${CONFIG.API_URL}${text}&access_token=${CONFIG.Github_token}&per_page=5`,
       );
 
       request.send();
@@ -85,7 +88,9 @@ const SearchInput = ({inputStyle, placeholder}) => {
   };
 
   const _handleChangeText = text => {
-    _onChangeText(text);
+    if (text !== ' ' && stateText.length >= 0) {
+      _onChangeText(text);
+    }
   };
 
   const _onFocus = () => {
@@ -103,11 +108,12 @@ const SearchInput = ({inputStyle, placeholder}) => {
   };
 
   const _renderRowData = (rowData, index) => {
-    const {login} = rowData;
+    const {login, avatar_url} = rowData;
     return (
-      <Text style={[styles.description]} numberOfLines={4}>
-        {login}
-      </Text>
+      <View style={styles.userRow}>
+        <Image style={styles.image} source={{uri: avatar_url}} />
+        <Text style={styles.loginText}>{login}</Text>
+      </View>
     );
   };
 
@@ -120,21 +126,32 @@ const SearchInput = ({inputStyle, placeholder}) => {
   };
 
   const _renderSeparator = (sectionID, rowID) => {
-    if (rowID === userData.length - 1) {
-      return null;
-    }
-
-    return <View key={`${sectionID}-${rowID}`} style={[styles.separator]} />;
+    return <View style={[styles.separator]} />;
   };
 
   const _renderListEmptyComponent = () => {
     return <></>;
   };
 
+  const _renderLeftIcon = () => {
+    return <Image style={styles.leftIcon} source={icons.user_pic} />;
+  };
+
+  const _renderRightIcon = () => {
+    return (
+      <ActivityIndicator
+        style={styles.loader}
+        animating={true}
+        size="small"
+        color="#2980b9"
+      />
+    );
+  };
+
   const _renderRow = (rowData = {}, index) => {
     return (
       <ScrollView
-        contentContainerStyle={{width: '100%', height: '40%'}}
+        contentContainerStyle={{width: '100%', height: '40%', borderRadius: 10}}
         scrollEnabled
         horizontal={true}
         showsHorizontalScrollIndicator={false}
@@ -173,19 +190,23 @@ const SearchInput = ({inputStyle, placeholder}) => {
 
   return (
     <View>
-      <TextInput
-        style={[styles.input, inputStyle]}
-        value={stateText}
-        placeholder={placeholder}
-        onChangeText={_handleChangeText}
-        onFocus={e => {
-          _onFocus();
-        }}
-        onBlur={e => {
-          _onBlur(e);
-        }}
-      />
-      {isLoading ? <Text>.....Loading</Text> : null}
+      <View style={styles.inputWrapper}>
+        {_renderLeftIcon()}
+        <TextInput
+          style={[styles.input, inputStyle]}
+          value={stateText}
+          placeholder={placeholder}
+          placeholderTextColor={Colors.border}
+          onChangeText={_handleChangeText}
+          onFocus={e => {
+            _onFocus();
+          }}
+          onBlur={e => {
+            _onBlur(e);
+          }}
+        />
+        {isLoading && stateText.length > 0 ? _renderRightIcon() : null}
+      </View>
       {_getFlatList()}
     </View>
   );
@@ -194,32 +215,49 @@ const SearchInput = ({inputStyle, placeholder}) => {
 const styles = StyleSheet.create({
   input: {
     height: DeviceHeight * 0.055,
-    // backgroundColor: Colors.grey,
-    color: '#f5f5f5',
-    borderRadius: 10,
+    width: DeviceWidth * 0.8,
+    color: Colors.white,
     padding: 10,
-    borderWidth: 0.19,
-    borderColor: '#fafafa',
   },
   separator: {
     height: 0.5,
-    backgroundColor: '#c8c7cc',
+    backgroundColor: Colors.border,
   },
   row: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     padding: 13,
     minHeight: 44,
     flexDirection: 'row',
   },
   description: {},
-  loader: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    height: 20,
-  },
   flatList: {
-    height: DeviceHeight * 0.35,
-    // borderWidth: 1,
+    // height: DeviceHeight * 0.35,
+    borderRadius: 10,
+    marginTop: 1,
+  },
+  inputWrapper: {
+    width: DeviceWidth * 0.92,
+    flexDirection: 'row',
+    height: DeviceHeight * 0.053,
+    borderWidth: 0.19,
+    borderColor: Colors.white,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  image: {
+    height: 40,
+    width: 40,
+    borderRadius: 30,
+  },
+  leftIcon: {position: 'absolute', height: 15, width: 15, left: 10},
+  loader: {position: 'absolute', right: 10},
+  userRow: {
+    flexDirection: 'row',
+  },
+  loginText: {
+    alignSelf: 'center',
+    marginLeft: 10,
   },
 });
 

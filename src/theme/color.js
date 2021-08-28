@@ -1,7 +1,8 @@
 export const Colors = {
   lightBlue: '#3C80F7',
-  white: '#333',
+  lightGrey: '#333',
   black: 'black',
   grey: '#f5f5f5',
-  //   primary,,
+  white: '#ffffff',
+  border: '#c8c7cc',
 };
